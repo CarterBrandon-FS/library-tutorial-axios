@@ -1,122 +1,97 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState, useRef } from "react";
+import axios from "axios";
+import AudioPlayer from "./components/AudioPlayer";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [songs, setSongs] = useState([]);
+  const [isloading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(null);
+  const [searchTerm, setSearchTerm] = useState([]);
+  const audioRef = useRef(null);
+
+  const fetchSongs = async () => {
+    if (!searchTerm.trim()) {
+      setError("Please enter an artist or song");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+
+    const query = searchTerm.trim();
+
+    try {
+      const response = await axios.get(
+        `https://itunes.apple.com/search?term=${query}&media=music&limit=6`,
+      );
+
+      const songList = response.data.results.map((item) => ({
+        id: item.trackId,
+        title: item.trackName,
+        artist: item.artistName,
+        duration: "0:30",
+        previewUrl: item.previewUrl,
+        artworkUrl: item.artworkUrl100,
+      }));
+
+      setSongs(songList);
+    } catch (error) {
+      setError("Could not load song");
+    }
+
+    setLoading(false);
+  };
+
+  const handleToggle = (song) => {
+    const audio = audioRef.current;
+
+    if (isPlaying === song.id) {
+      audio.pause();
+      setIsPlaying(null);
+    } else {
+      audio.src = song.previewUrl;
+      audio.play();
+      setIsPlaying(song.id);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
+    <div className="App">
+      <h1>My Music Library</h1>
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search for an artist/song title"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && fetchSongs()}
+        />
+
+        <button onClick={fetchSongs} disabled={isloading}>
+          {isloading ? "Loading..." : "Load Songs"}
         </button>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
+      {error && <p className="error">{error}</p>}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      <div className="song-grid">
+        {songs.map((song) => (
+          <AudioPlayer
+            key={song.id}
+            title={song.title}
+            artist={song.artist}
+            duration={song.duration}
+            artworkUrl={song.artworkUrl}
+            isPlaying={isPlaying === song.id}
+            onToggle={() => handleToggle(song)}
+          />
+        ))}
+      </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <audio ref={audioRef} onEnded={() => setIsPlaying(null)} />
+    </div>
+  );
 }
 
-export default App
+export default App;

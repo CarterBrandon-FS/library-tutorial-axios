@@ -1,16 +1,31 @@
-# React + Vite
+# Library Tutorial — Axios
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+**Author:** Brandon Carter
+**Course:** Project and Portfolio II
 
-Currently, two official plugins are available:
+## Library
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Axios — Promise-based HTTP client for the browser and Node.js
+Docs: https://axios-http.com
 
-## React Compiler
+## What It Does
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Axios makes HTTP requests simpler with automatic JSON parsing,
+interceptors, and clean error handling.
 
-## Expanding the Oxlint configuration
+## Install
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+npm install axios
+
+## Run
+
+npm run dev
+npm start
+
+## Demo
+
+Fetches 5 posts from JSONPlaceholder and renders them.
+
+## Credits
+
+Axios by Matt Zabriskie & contributors — MIT License
